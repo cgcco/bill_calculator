@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chillies & Garlic Bill Calculator</title>
+    <title>Chillies & Garlic Calculator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
@@ -13,128 +13,175 @@
             --bg-color: #f1f2f6;
         }
         
-        body { background-color: var(--bg-color); padding: 40px 20px; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { 
+            background-color: var(--bg-color); 
+            padding: 15px 5px; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            font-size: 0.8rem; /* Slightly smaller global font */
+        }
         
-        /* Brand Header Styles */
+        /* Compact Horizontal Header */
         .header-banner { 
             background-color: var(--primary-color); 
             color: white; 
-            padding: 50px 20px; 
-            text-align: center; 
-            border-bottom: 6px solid var(--accent-color);
-        }
-        
-        /* The Logo Container */
-        .logo-container {
-            background: white;
-            width: 180px; /* Large professional size */
-            height: 180px; 
-            margin: 0 auto 25px auto;
+            padding: 12px 15px; 
+            border-bottom: 4px solid var(--accent-color);
             display: flex;
             align-items: center;
-            justify-content: center;
-            border-radius: 50%; 
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            padding: 15px;
-            border: 4px solid var(--accent-color);
+            justify-content: flex-start;
+            gap: 15px;
         }
-
+        
         .logo-img { 
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            display: block;
+            height: 45px; 
+            width: auto;
+            background: white;
+            padding: 3px;
+            border-radius: 4px;
         }
 
+        .header-text { text-align: left; }
         .initiative-text { 
-            font-size: 1.1rem; 
-            font-weight: 400; 
-            letter-spacing: 2px; 
+            font-size: 0.65rem; 
             color: #b2bec3; 
-            margin-bottom: 10px; 
             text-transform: uppercase; 
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+        .header-title { font-size: 1rem; margin: 0; font-weight: 700; }
+
+        .card { border-radius: 12px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.08); overflow: hidden; background: white; }
+        
+        /* Table Optimization for all columns */
+        .table { margin-bottom: 0; table-layout: fixed; width: 100%; }
+        .table th { font-size: 0.65rem; color: #636e72; padding: 8px 2px; text-align: center; }
+        .table td { padding: 5px 2px; vertical-align: middle; }
+        
+        .form-control-sm { 
+            font-size: 0.8rem; 
+            padding: 0.3rem; 
+            text-align: center;
+            border: 1px solid #dfe6e9;
         }
 
-        .card { border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; background: white; }
-        .btn-add { background-color: var(--accent-color); border: none; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; }
-        .summary-card { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; padding: 25px; }
-        .grand-total-row { font-size: 2.2rem; color: var(--accent-color); font-weight: 800; border-top: 2px solid #ddd; padding-top: 15px; margin-top: 15px; }
-        .disclaimer { font-size: 0.9rem; color: #636e72; font-style: italic; margin-top: 30px; text-align: center; padding: 20px; background: #fff; line-height: 1.5; }
+        .amount-display {
+            font-weight: 700;
+            font-size: 0.8rem;
+            display: block;
+            text-align: right;
+            padding-right: 5px;
+        }
 
-        @media print {
-            .btn-add, .btn-outline-danger, .no-print, .btn-outline-secondary { display: none !important; }
-            body { padding: 0; background: white; }
-            .card { box-shadow: none; border: none; }
-            .header-banner { padding: 20px; }
+        .btn-delete {
+            color: #ff7675;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: block;
+            text-align: center;
+        }
+
+        .summary-card { 
+            background-color: #f8f9fa; 
+            border-radius: 8px; 
+            padding: 12px; 
+            font-size: 0.8rem;
+        }
+        
+        .grand-total-row { 
+            font-size: 1.4rem; 
+            color: var(--accent-color); 
+            font-weight: 800; 
+            border-top: 1px solid #ddd; 
+            padding-top: 8px; 
+            margin-top: 8px; 
+        }
+
+        .disclaimer { 
+            font-size: 0.7rem; 
+            color: #636e72; 
+            text-align: center; 
+            padding: 12px; 
+            line-height: 1.3;
+        }
+
+        @media (max-width: 480px) {
+            .header-banner { gap: 10px; padding: 10px; }
+            .logo-img { height: 35px; }
+            .header-title { font-size: 0.9rem; }
+        }
+
+        @media d-print-none {
+            .no-print-btn { font-size: 0.75rem; padding: 5px 10px; }
         }
     </style>
 </head>
 <body>
 
-<div id="app" class="container">
+<div id="app" class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-lg-11">
+        <div class="col-xl-8 col-lg-10 p-0">
             <div class="card">
                 <div class="header-banner">
-                    <div class="logo-container">
-                        <img src="logo.png" alt="Chillies & Garlic Logo" class="logo-img">
+                    <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+                    <div class="header-text">
+                        <p class="initiative-text">An initiative by Chillies & Garlic Comm Co.</p>
+                        <h1 class="header-title">Trade Bill Calculator</h1>
                     </div>
-                    <div class="initiative-text">An initiative by Chillies & Garlic Comm Co.</div>
-                    <h1 class="fw-bold">Trade Bill Calculator</h1>
                 </div>
 
-                <div class="p-4 p-md-5">
-                    <div class="table-responsive">
-                        <table class="table table-borderless align-middle">
-                            <thead class="border-bottom">
-                                <tr class="text-muted">
-                                    <th>QTY (UNITS)</th>
-                                    <th>WEIGHT (KG)</th>
-                                    <th>RATE</th>
-                                    <th>TOTAL AMOUNT</th>
-                                    <th class="no-print"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(item, index) in items" :key="index" class="border-bottom">
-                                    <td><input type="number" class="form-control border-0 bg-light" v-model.number="item.qty"></td>
-                                    <td><input type="number" class="form-control border-0 bg-light" v-model.number="item.weight"></td>
-                                    <td><input type="number" class="form-control border-0 bg-light" v-model.number="item.rate"></td>
-                                    <td class="fw-bold text-dark">₹ {{ formatPrice(item.weight * item.rate) }}</td>
-                                    <td class="text-end no-print">
-                                        <button @click="removeItem(index)" class="btn btn-sm text-danger" v-if="items.length > 1">✕</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="p-2">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 18%;">QTY</th>
+                                <th style="width: 24%;">WT(KG)</th>
+                                <th style="width: 22%;">RATE</th>
+                                <th style="width: 28%;">AMOUNT</th>
+                                <th style="width: 8%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in items" :key="index">
+                                <td><input type="number" class="form-control form-control-sm" v-model.number="item.qty"></td>
+                                <td><input type="number" class="form-control form-control-sm" v-model.number="item.weight"></td>
+                                <td><input type="number" class="form-control form-control-sm" v-model.number="item.rate"></td>
+                                <td>
+                                    <span class="amount-display">₹{{ formatPrice(item.weight * item.rate) }}</span>
+                                </td>
+                                <td>
+                                    <a href="#" @click.prevent="removeItem(index)" class="btn-delete" v-if="items.length > 1">×</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="d-flex gap-2 mt-3 px-2 d-print-none">
+                        <button @click="addItem" class="btn btn-success btn-sm">+ Add Line</button>
+                        <button onclick="window.print()" class="btn btn-outline-dark btn-sm">Save PDF</button>
                     </div>
 
-                    <div class="d-flex justify-content-between mt-4 no-print">
-                        <button @click="addItem" class="btn btn-add">+ Add Item</button>
-                        <button onclick="window.print()" class="btn btn-outline-secondary">Print / Save as PDF</button>
-                    </div>
-
-                    <div class="row mt-5 justify-content-end">
-                        <div class="col-md-6">
+                    <div class="row mt-4 px-2">
+                        <div class="col-12 col-md-7 ms-auto">
                             <div class="summary-card">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>Total Qty:</span>
-                                    <span class="fw-bold">{{ totalQty }}</span>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Total Items:</span>
+                                    <span class="fw-bold">{{ totalQty }} Units</span>
                                 </div>
-                                <div class="d-flex justify-content-between mb-2">
+                                <div class="d-flex justify-content-between mb-1">
                                     <span>Total Weight:</span>
                                     <span class="fw-bold">{{ totalWeight.toFixed(2) }} kg</span>
                                 </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>Base Amount:</span>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Subtotal:</span>
                                     <span class="fw-bold">₹ {{ formatPrice(subtotal) }}</span>
                                 </div>
                                 <div class="d-flex justify-content-between text-muted">
-                                    <span>APMC Fee (0.744%):</span>
+                                    <span>APMC (0.744%):</span>
                                     <span>+ ₹ {{ formatPrice(apmcAmount) }}</span>
                                 </div>
-                                <div class="d-flex justify-content-between text-muted mb-2">
-                                    <span>Levy (₹1.66 × {{ totalQty }}):</span>
+                                <div class="d-flex justify-content-between text-muted mb-1">
+                                    <span>Levy (₹1.66/unit):</span>
                                     <span>+ ₹ {{ formatPrice(levyAmount) }}</span>
                                 </div>
                                 <div class="d-flex justify-content-between grand-total-row">
@@ -145,7 +192,7 @@
                         </div>
                     </div>
 
-                    <div class="disclaimer">
+                    <div class="disclaimer px-2">
                         <strong>Disclaimer:</strong> The actual total amount might vary slightly because of APMC calculations due to commission variations.
                     </div>
                 </div>
