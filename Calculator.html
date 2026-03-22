@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chillies & Garlic Bill Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        :root {
+            --primary-color: #2d3436; 
+            --accent-color: #10ac84;  
+            --bg-color: #f1f2f6;
+        }
+        
+        body { background-color: var(--bg-color); padding: 40px 20px; font-family: 'Segoe UI', Roboto, sans-serif; }
+        
+        /* Brand Header Styles */
+        .header-banner { 
+            background-color: var(--primary-color); 
+            color: white; 
+            padding: 50px 20px; 
+            text-align: center; 
+            border-bottom: 6px solid var(--accent-color);
+        }
+        
+        /* The Logo Container */
+        .logo-container {
+            background: white;
+            width: 180px; /* Large professional size */
+            height: 180px; 
+            margin: 0 auto 25px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%; 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            padding: 15px;
+            border: 4px solid var(--accent-color);
+        }
+
+        .logo-img { 
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .initiative-text { 
+            font-size: 1.1rem; 
+            font-weight: 400; 
+            letter-spacing: 2px; 
+            color: #b2bec3; 
+            margin-bottom: 10px; 
+            text-transform: uppercase; 
+        }
+
+        .card { border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; background: white; }
+        .btn-add { background-color: var(--accent-color); border: none; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; }
+        .summary-card { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; padding: 25px; }
+        .grand-total-row { font-size: 2.2rem; color: var(--accent-color); font-weight: 800; border-top: 2px solid #ddd; padding-top: 15px; margin-top: 15px; }
+        .disclaimer { font-size: 0.9rem; color: #636e72; font-style: italic; margin-top: 30px; text-align: center; padding: 20px; background: #fff; line-height: 1.5; }
+
+        @media print {
+            .btn-add, .btn-outline-danger, .no-print, .btn-outline-secondary { display: none !important; }
+            body { padding: 0; background: white; }
+            .card { box-shadow: none; border: none; }
+            .header-banner { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-11">
+            <div class="card">
+                <div class="header-banner">
+                    <div class="logo-container">
+                        <img src="logo.png" alt="Chillies & Garlic Logo" class="logo-img">
+                    </div>
+                    <div class="initiative-text">An initiative by Chillies & Garlic Comm Co.</div>
+                    <h1 class="fw-bold">Trade Bill Calculator</h1>
+                </div>
+
+                <div class="p-4 p-md-5">
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle">
+                            <thead class="border-bottom">
+                                <tr class="text-muted">
+                                    <th>QTY (UNITS)</th>
+                                    <th>WEIGHT (KG)</th>
+                                    <th>RATE</th>
+                                    <th>TOTAL AMOUNT</th>
+                                    <th class="no-print"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(item, index) in items" :key="index" class="border-bottom">
+                                    <td><input type="number" class="form-control border-0 bg-light" v-model.number="item.qty"></td>
+                                    <td><input type="number" class="form-control border-0 bg-light" v-model.number="item.weight"></td>
+                                    <td><input type="number" class="form-control border-0 bg-light" v-model.number="item.rate"></td>
+                                    <td class="fw-bold text-dark">₹ {{ formatPrice(item.weight * item.rate) }}</td>
+                                    <td class="text-end no-print">
+                                        <button @click="removeItem(index)" class="btn btn-sm text-danger" v-if="items.length > 1">✕</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4 no-print">
+                        <button @click="addItem" class="btn btn-add">+ Add Item</button>
+                        <button onclick="window.print()" class="btn btn-outline-secondary">Print / Save as PDF</button>
+                    </div>
+
+                    <div class="row mt-5 justify-content-end">
+                        <div class="col-md-6">
+                            <div class="summary-card">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Total Qty:</span>
+                                    <span class="fw-bold">{{ totalQty }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Total Weight:</span>
+                                    <span class="fw-bold">{{ totalWeight.toFixed(2) }} kg</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Base Amount:</span>
+                                    <span class="fw-bold">₹ {{ formatPrice(subtotal) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between text-muted">
+                                    <span>APMC Fee (0.744%):</span>
+                                    <span>+ ₹ {{ formatPrice(apmcAmount) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between text-muted mb-2">
+                                    <span>Levy (₹1.66 × {{ totalQty }}):</span>
+                                    <span>+ ₹ {{ formatPrice(levyAmount) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between grand-total-row">
+                                    <span>TOTAL:</span>
+                                    <span>₹ {{ formatPrice(grandTotal) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="disclaimer">
+                        <strong>Disclaimer:</strong> The actual total amount might vary slightly because of APMC calculations due to commission variations.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const { createApp } = Vue
+    createApp({
+        data() {
+            return {
+                apmcRate: 0.00744,
+                levyPerUnit: 1.66,
+                items: [{ qty: 0, weight: 0, rate: 0 }]
+            }
+        },
+        computed: {
+            totalQty() { return this.items.reduce((sum, item) => sum + (Number(item.qty) || 0), 0) },
+            totalWeight() { return this.items.reduce((sum, item) => sum + (Number(item.weight) || 0), 0) },
+            subtotal() { return this.items.reduce((sum, item) => sum + ((Number(item.weight) || 0) * (Number(item.rate) || 0)), 0) },
+            apmcAmount() { return this.subtotal * this.apmcRate },
+            levyAmount() { return this.totalQty * this.levyPerUnit },
+            grandTotal() { return this.subtotal + this.apmcAmount + this.levyAmount }
+        },
+        methods: {
+            addItem() { this.items.push({ qty: 0, weight: 0, rate: 0 }) },
+            removeItem(index) { this.items.splice(index, 1) },
+            formatPrice(v) { return v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
+        }
+    }).mount('#app')
+</script>
+
+</body>
+</html>
